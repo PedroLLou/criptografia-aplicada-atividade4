@@ -31,11 +31,11 @@ outros: Ni é múltiplo de nj para todo j diferente de i. É isso que faz as
 parcelas não interferirem umas nas outras.
 
 Escrito por Pedro Lourençoni para a Atividade 4 de Criptografia Aplicada.
-Reaproveita `mdc` e `inverso_multiplicativo`, que são as partes do grupo.
+Reaproveita `algoritmo_euclides` e `inverso_multiplicativo`, que são as partes
+dos colegas.
 """
 
-from mdc import mdc
-from invMult import inverso_multiplicativo
+from .euclides import algoritmo_euclides, inverso_multiplicativo
 
 
 def validar_congruencias(congruencias: list[tuple[int, int]]) -> None:
@@ -49,7 +49,7 @@ def validar_congruencias(congruencias: list[tuple[int, int]]) -> None:
     if not congruencias:
         raise ValueError("é preciso pelo menos uma congruência")
 
-    for a, n in congruencias:
+    for _, n in congruencias:
         if n < 1:
             raise ValueError(f"módulo inválido: {n}. Todo módulo precisa ser >= 1")
 
@@ -57,7 +57,7 @@ def validar_congruencias(congruencias: list[tuple[int, int]]) -> None:
         for j in range(i + 1, len(congruencias)):
             ni = congruencias[i][1]
             nj = congruencias[j][1]
-            g = mdc(ni, nj)
+            g = algoritmo_euclides(ni, nj)
             if g != 1:
                 raise ValueError(
                     f"os módulos {ni} e {nj} não são coprimos: MDC({ni}, {nj}) = {g}. "
@@ -107,34 +107,3 @@ def verificar(x: int, congruencias: list[tuple[int, int]]) -> bool:
     silêncio: um resultado errado continua sendo um número plausível.
     """
     return all(x % n == a % n for a, n in congruencias)
-
-
-if __name__ == "__main__":
-    print("--- Teorema Chinês do Resto ---")
-    print("Resolve x ≡ a (mod n) para várias congruências de módulos coprimos.\n")
-
-    quantidade = int(input("Quantas congruências? "))
-
-    congruencias: list[tuple[int, int]] = []
-    for i in range(quantidade):
-        print(f"\nCongruência {i + 1}:")
-        a = int(input(f"  a{i + 1} (o resto): "))
-        n = int(input(f"  n{i + 1} (o módulo): "))
-        congruencias.append((a, n))
-
-    print("\nSistema:")
-    for a, n in congruencias:
-        print(f"  x ≡ {a} (mod {n})")
-
-    try:
-        x, n_total = teorema_chines_resto(congruencias)
-    except ValueError as erro:
-        print(f"\nNão dá para resolver: {erro}")
-    else:
-        print(f"\nSolução: x ≡ {x} (mod {n_total})")
-        print(f"Ou seja, as soluções são {x} + {n_total}k, para k inteiro.")
-
-        print("\nVerificação:")
-        for a, n in congruencias:
-            print(f"  {x} mod {n} = {x % n}, esperado {a % n}")
-        print("Confere!" if verificar(x, congruencias) else "NÃO CONFERE, algo está errado")
